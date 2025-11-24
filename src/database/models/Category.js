@@ -6,13 +6,13 @@ export default class Category extends Model {
             {
                 nome: DataTypes.STRING,
 
-                descricao: DataTypes.TEXT,
+                description: DataTypes.TEXT,
             },
 
             {
                 sequelize,
-                modelName: "Categoria",
-                tableName: "categorias",
+                modelName: "Category",
+                tableName: "categories",
                 underscored: true,
             }
         );
@@ -20,9 +20,9 @@ export default class Category extends Model {
     }
 
     static associate(models) {
-        this.hasMany(models.Produto, {
-            foreignKey: 'categoria_id',
-            as: 'produtos',
+        this.hasMany(models.Product, {
+            foreignKey: 'category_id',
+            as: 'products',
         });
     }
 }
