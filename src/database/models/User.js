@@ -10,7 +10,7 @@ export default class User extends Model {
         password: DataTypes.STRING,
         role: {
           type: DataTypes.STRING,
-          defaultValue: 'costumer',
+          defaultValue: 'customer',
         },
 
         password_hash: {
@@ -24,6 +24,7 @@ export default class User extends Model {
         sequelize,
         modelName: 'User',
         tableName: 'users',
+        underscored: true,
         hooks: {
           beforeCreate: async (user) => {
             if (user.password) {
