@@ -10,7 +10,7 @@ export default class Order extends Model {
                 allowNull: false,
             },
 
-            total: {
+            total_amount: {
                 type: DataTypes.DECIMAL(10, 2),
                 allowNull: false,
             },
