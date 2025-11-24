@@ -44,5 +44,10 @@ export default class Product extends Model {
             foreignKey: 'category_id',
             as: 'category',
         });
+
+        this.hasMany(models.OrderItem, {
+            foreignKey: 'product_id',
+            as: 'order_items',
+        });
     }
 }
