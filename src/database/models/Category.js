@@ -4,9 +4,13 @@ export default class Category extends Model {
     static init(sequelize) {
         super.init(
             {
-                nome: DataTypes.STRING,
-
-                description: DataTypes.TEXT,
+                name: {
+                    type: DataTypes.STRING,
+                    allowNull: false,
+                },
+                description: {
+                    type: DataTypes.TEXT,
+                },
             },
 
             {
