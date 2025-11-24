@@ -1,0 +1,50 @@
+```
+src/
+  config/
+    database.js
+    multer.js
+    jwt.js
+  database/
+    migrations/
+    seeders/
+    models/
+      User.js
+      Product.js
+      Category.js
+      Order.js
+      OrderItem.js
+  controllers/
+    UserController.js
+    AuthController.js
+    ProductController.js
+    CategoryController.js
+    OrderController.js
+  services/
+    UserService.js
+    ProductService.js
+    CategoryService.js
+    OrderService.js
+  repositories/
+    UserRepository.js
+    ProductRepository.js
+    CategoryRepository.js
+    OrderRepository.js
+  middlewares/
+    authMiddleware.js
+    errorMiddleware.js
+  validators/
+    userValidator.js
+    authValidator.js
+    productValidator.js
+  routes/
+    userRoutes.js
+    authRoutes.js
+    productRoutes.js
+    categoryRoutes.js
+    orderRoutes.js
+  utils/
+    logger.js
+    response.js
+app.js
+server.js
+```
