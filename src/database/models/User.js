@@ -44,14 +44,14 @@ export default class User extends Model {
   }
 
   static associate(models) {
-    this.hasMany(models.Pedido, { 
+    this.hasMany(models.Order, { 
         foreignKey: 'user_id', 
-        as: 'pedidos' 
+        as: 'orders' 
     });
 
-    this.hasMany(models.Endereco, {
+    this.hasMany(models.Address, {
         foreignKey: 'user_id',
-        as: 'enderecos',
+        as: 'addresses',
     });
   }
 
