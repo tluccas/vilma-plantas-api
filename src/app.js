@@ -1,5 +1,7 @@
 import express from 'express';
-
+import cors from 'cors';
+import helmet from 'helmet';
+import healthRoute from './routes/healthRoute.js';
 
 class App {
   constructor() {
@@ -8,9 +10,15 @@ class App {
     this.routes();
   }
 
-  middlewares() {}
+  middlewares() {
+    this.server.use(cors());
+    this.server.use(helmet());
+    this.server.use(express.json());
+  }
 
-  routes() {}
+  routes() {
+    this.server.use(healthRoute);
+  }
 }
 
 export default new App().server;
