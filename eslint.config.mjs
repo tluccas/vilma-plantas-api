@@ -2,7 +2,6 @@ import js from '@eslint/js';
 import globals from 'globals';
 import prettier from 'eslint-config-prettier';
 import jsonPlugin from 'eslint-plugin-json';
-import json from '@eslint/json';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
