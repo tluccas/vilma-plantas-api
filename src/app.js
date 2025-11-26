@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import healthRoute from './routes/healthRoute.js';
+import authRoutes from './routes/authRoutes.js';
 
 class App {
   constructor() {
@@ -11,13 +12,17 @@ class App {
   }
 
   middlewares() {
-    this.server.use(cors());
+    this.server.use(cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+    }));
     this.server.use(helmet());
     this.server.use(express.json());
   }
 
   routes() {
     this.server.use(healthRoute);
+    this.server.use('/auth', authRoutes);
   }
 }
 
