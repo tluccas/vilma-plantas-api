@@ -1,5 +1,5 @@
 import JWT from 'jsonwebtoken';
-import authConfig from '../../config/authConfig.js';
+import authConfig from '../config/authConfig.js';
 
 export default function authMiddleware (req, res, next) {
     const token = req.cookies.token;
