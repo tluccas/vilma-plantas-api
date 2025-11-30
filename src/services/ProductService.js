@@ -94,7 +94,7 @@ export default class ProductService {
         throw error;
       }
 
-      throw new Error('Não foi possível criar o produto');
+      throw new Error( error.message ||'Não foi possível criar o produto');
     }
   }
 

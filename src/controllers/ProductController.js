@@ -11,7 +11,7 @@ class ProductController {
             return res.status(200).json(productsData);
         } catch (error) {
             console.error('Erro no Controller ao buscar produtos:', error);
-            return res.status(500).json({ message: 'Erro interno ao buscar produtos.' });
+            return res.status(500).json({ error: 'Erro interno ao buscar produtos.' });
         }
     }
 
@@ -24,7 +24,7 @@ class ProductController {
             return res.status(201).json(newProduct);
         } catch (error) {
             console.error('Erro no Controller ao criar produto:', error);
-            return res.status(500).json({ message: 'Erro interno ao criar produto.' });
+            return res.status(500).json({ error: error.message || 'Erro interno ao criar produto.' });
         }
     }
 }
