@@ -38,10 +38,28 @@ class AuthController {
     });
   }
 
-  async delete(req, res){
-     res.clearCookie('token', { path: "/" });
-     return res.json({ message: 'Logout realizado com sucesso!' });
+  async delete(req, res) {
+    res.clearCookie('token', { path: '/' });
+    return res.json({ message: 'Logout realizado com sucesso!' });
+  }
 
+  async profile(req, res) {
+    try {
+      const user = await User.findByPk(req.userId, {
+        attributes: ['id', 'name', 'email', 'role'],
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+
+      return res.json({
+        user,
+        authenticated: true,
+      });
+    } catch (error) {
+      return res.status(500).json({ error, message: 'Erro interno do servidor' });
+    }
   }
 }
 
