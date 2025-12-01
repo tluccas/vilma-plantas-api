@@ -30,7 +30,7 @@ class UserController {
         } catch (error) {
 
             if (error.name === 'ValidationError') {
-                return res.status(400).json({ errors: error.errors });
+                return res.status(400).json({ message: error.errors });
             }
 
             if (error.status) {
