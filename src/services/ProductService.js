@@ -42,7 +42,7 @@ export default class ProductService {
       limit,
       offset,
       order,
-      attributes: ['id', 'name', 'price', 'category_id', 'stock', 'createdAt', 'updatedAt'],
+      attributes: ['id', 'name', 'price', 'description', 'category_id', 'stock', 'createdAt', 'updatedAt'],
       include: [{ model: Category, as: 'category', attributes: ['name'] }],
     });
 
@@ -71,7 +71,16 @@ export default class ProductService {
       const newProduct = await Product.create(productData);
 
       const responseProduct = await Product.findByPk(newProduct.id, {
-        attributes: ['id', 'name', 'price', 'category_id', 'stock', 'createdAt', 'updatedAt'],
+        attributes: [
+          'id',
+          'name',
+          'price',
+          'category_id',
+          'description',
+          'stock',
+          'createdAt',
+          'updatedAt',
+        ],
         include: [{ model: Category, as: 'category', attributes: ['name'] }],
       });
 
