@@ -24,7 +24,11 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.15.3",
+    "pino": "^10.1.0",
+    "redis": "^5.10.0",
     "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "yup": "^1.7.1"
   },
   "devDependencies": {
