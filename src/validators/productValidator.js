@@ -34,6 +34,41 @@ export const createProductSchema = yup.object().shape({
     .required('Categoria é obrigatória')
     .integer('ID da categoria deve ser um número inteiro')
     .positive('ID da categoria deve ser um valor positivo'),
+
+  // Suporte para múltiplas imagens
+  images: yup
+    .array()
+    .of(
+      yup.object().shape({
+        url: yup
+          .string()
+          .required('URL da imagem é obrigatória')
+          .url('URL da imagem deve ser uma URL válida')
+          .matches(
+            /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i,
+            'URL deve apontar para um arquivo de imagem válido (jpg, jpeg, png, gif, webp, svg)',
+          )
+          .max(500, 'URL da imagem deve ter no máximo 500 caracteres'),
+      }),
+    )
+    .nullable()
+    .max(10, 'Máximo de 10 imagens permitidas')
+    .test('unique-urls', 'URLs das imagens devem ser únicas', function (images) {
+      if (!images) return true;
+      const urls = images.map((img) => img.url);
+      return urls.length === new Set(urls).size;
+    }),
+
+  // Recebe uma imagem única para compatibilidade retroativa
+  image_url: yup
+    .string()
+    .url('URL da imagem deve ser uma URL válida')
+    .matches(
+      /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i, // regex para extensões de imagem comuns
+      'URL deve apontar para um arquivo de imagem válido (jpg, jpeg, png, gif, webp, svg)',
+    )
+    .max(500, 'URL da imagem deve ter no máximo 500 caracteres')
+    .nullable(),
 });
 
 // Schema para atualizar produto (campos opcionais)
@@ -66,6 +101,41 @@ export const updateProductSchema = yup.object().shape({
     .number()
     .integer('ID da categoria deve ser um número inteiro')
     .positive('ID da categoria deve ser um valor positivo'),
+
+  // Suporte para múltiplas imagens no update
+  images: yup
+    .array()
+    .of(
+      yup.object().shape({
+        url: yup
+          .string()
+          .required('URL da imagem é obrigatória')
+          .url('URL da imagem deve ser uma URL válida')
+          .matches(
+            /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i,
+            'URL deve apontar para um arquivo de imagem válido (jpg, jpeg, png, gif, webp, svg)',
+          )
+          .max(500, 'URL da imagem deve ter no máximo 500 caracteres'),
+      }),
+    )
+    .nullable()
+    .max(10, 'Máximo de 10 imagens permitidas')
+    .test('unique-urls', 'URLs das imagens devem ser únicas', function (images) {
+      if (!images) return true;
+      const urls = images.map((img) => img.url);
+      return urls.length === new Set(urls).size;
+    }),
+
+  // Backward compatibility
+  image_url: yup
+    .string()
+    .url('URL da imagem deve ser uma URL válida')
+    .matches(
+      /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i,
+      'URL deve apontar para um arquivo de imagem válido (jpg, jpeg, png, gif, webp, svg)',
+    )
+    .max(500, 'URL da imagem deve ter no máximo 500 caracteres')
+    .nullable(),
 });
 
 // Schema para filtros de busca
@@ -124,9 +194,33 @@ export const getProductsSchema = yup.object().shape({
     ),
 });
 
+// Função helper para normalizar dados de imagem
+const normalizeImageData = (data) => {
+  // Se recebeu image_url (compatibilidade), converte para images array
+  if (data.image_url && !data.images) {
+    data.images = [{ url: data.image_url }];
+    delete data.image_url;
+  }
+
+  // Se recebeu string única no campo images, converte para array
+  if (typeof data.images === 'string') {
+    data.images = [{ url: data.images }];
+  }
+
+  // Se recebeu array de strings, converte para array de objetos
+  if (Array.isArray(data.images) && data.images.length > 0 && typeof data.images[0] === 'string') {
+    data.images = data.images.map((url) => ({ url }));
+  }
+
+  return data;
+};
+
 // Middleware para validação
 export const validateCreateProduct = async (req, res, next) => {
   try {
+    // Normaliza os dados de imagem antes da validação
+    req.body = normalizeImageData(req.body);
+
     const validatedData = await createProductSchema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -144,6 +238,9 @@ export const validateCreateProduct = async (req, res, next) => {
 
 export const validateUpdateProduct = async (req, res, next) => {
   try {
+    // Normaliza os dados de imagem antes da validação
+    req.body = normalizeImageData(req.body);
+
     const validatedData = await updateProductSchema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -181,7 +278,10 @@ export const validateProductData = async (data, isUpdate = false) => {
   const schema = isUpdate ? updateProductSchema : createProductSchema;
 
   try {
-    const validatedData = await schema.validate(data, {
+    // Normaliza os dados de imagem antes da validação
+    const normalizedData = normalizeImageData({ ...data });
+
+    const validatedData = await schema.validate(normalizedData, {
       abortEarly: false,
       stripUnknown: true,
     });
@@ -193,5 +293,58 @@ export const validateProductData = async (data, isUpdate = false) => {
       errors: error.errors,
       message: 'Dados inválidos',
     };
+  }
+};
+
+// Schema para validação de upload de imagens
+export const imageUploadSchema = yup.object().shape({
+  images: yup
+    .array()
+    .of(
+      yup.object().shape({
+        fieldname: yup.string().required(),
+        originalname: yup.string().required(),
+        mimetype: yup
+          .string()
+          .required()
+          .matches(
+            /^image\/(jpeg|jpg|png|gif|webp|svg\+xml)$/,
+            'Arquivo deve ser uma imagem válida (JPEG, PNG, GIF, WebP, SVG)'
+          ),
+        size: yup
+          .number()
+          .required()
+          .max(5 * 1024 * 1024, 'Imagem deve ter no máximo 5MB'), // 5MB
+      })
+    )
+    .min(1, 'Pelo menos uma imagem é obrigatória')
+    .max(10, 'Máximo de 10 imagens permitidas'),
+});
+
+// Validador para arquivos de imagem
+export const validateImageUpload = async (req, res, next) => {
+  try {
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      return res.status(400).json({
+        error: 'Nenhuma imagem foi enviada',
+        message: 'É obrigatório enviar pelo menos uma imagem',
+      });
+    }
+
+    const validatedData = await imageUploadSchema.validate(
+      { images: req.files },
+      {
+        abortEarly: false,
+        stripUnknown: true,
+      }
+    );
+
+    req.files = validatedData.images;
+    next();
+  } catch (error) {
+    return res.status(400).json({
+      error: 'Arquivos de imagem inválidos',
+      details: error.errors,
+    });
   }
 };
