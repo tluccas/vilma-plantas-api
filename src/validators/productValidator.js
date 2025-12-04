@@ -309,13 +309,13 @@ export const imageUploadSchema = yup.object().shape({
           .required()
           .matches(
             /^image\/(jpeg|jpg|png|gif|webp|svg\+xml)$/,
-            'Arquivo deve ser uma imagem válida (JPEG, PNG, GIF, WebP, SVG)'
+            'Arquivo deve ser uma imagem válida (JPEG, PNG, GIF, WebP, SVG)',
           ),
         size: yup
           .number()
           .required()
           .max(5 * 1024 * 1024, 'Imagem deve ter no máximo 5MB'), // 5MB
-      })
+      }),
     )
     .min(1, 'Pelo menos uma imagem é obrigatória')
     .max(10, 'Máximo de 10 imagens permitidas'),
@@ -336,7 +336,7 @@ export const validateImageUpload = async (req, res, next) => {
       {
         abortEarly: false,
         stripUnknown: true,
-      }
+      },
     );
 
     req.files = validatedData.images;
