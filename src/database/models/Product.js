@@ -1,53 +1,58 @@
 import { Model, DataTypes } from 'sequelize';
 
 export default class Product extends Model {
-    static init(sequelize) {
-        super.init(
-            {
-                name: {
-                    type: DataTypes.STRING,
-                    allowNull: false,
-                },
+  static init(sequelize) {
+    super.init(
+      {
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
 
-                description: {
-                    type: DataTypes.TEXT,
-                },
+        description: {
+          type: DataTypes.TEXT,
+        },
 
-                price: {
-                    type: DataTypes.DECIMAL(10, 2),
-                    allowNull: false,
-                },
+        price: {
+          type: DataTypes.DECIMAL(10, 2),
+          allowNull: false,
+        },
 
-                stock: {
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                },
+        stock: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
 
-                category_id: {
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                },
-            },
+        category_id: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
+      },
 
-            {
-                sequelize,
-                modelName: "Product",
-                tableName: "products",
-                underscored: true,
-            }
-        );
-        return this;  
-    }
+      {
+        sequelize,
+        modelName: 'Product',
+        tableName: 'products',
+        underscored: true,
+      },
+    );
+    return this;
+  }
 
-    static associate(models) {
-        this.belongsTo(models.Category, {
-            foreignKey: 'category_id',
-            as: 'category',
-        });
+  static associate(models) {
+    this.belongsTo(models.Category, {
+      foreignKey: 'category_id',
+      as: 'category',
+    });
 
-        this.hasMany(models.OrderItem, {
-            foreignKey: 'product_id',
-            as: 'order_items',
-        });
-    }
+    this.hasMany(models.OrderItem, {
+      foreignKey: 'product_id',
+      as: 'order_items',
+    });
+
+    this.hasMany(models.Image, {
+      foreignKey: 'product_id',
+      as: 'images',
+    });
+  }
 }
