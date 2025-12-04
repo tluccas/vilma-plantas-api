@@ -6,6 +6,7 @@ import Order from "./models/Order.js";
 import OrderItem from "./models/OrderItem.js";
 import Category from "./models/Category.js";
 import Address from "./models/Address.js";
+import Image from "./models/Image.js";
 
 
 const models = [
@@ -15,6 +16,7 @@ const models = [
     OrderItem,
     Category,
     Address,
+    Image,
 ];
 
 class DataBase{
@@ -46,4 +48,5 @@ export default {
     OrderItem,
     Category,
     Address,
+    Image,
 };
