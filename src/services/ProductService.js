@@ -94,7 +94,7 @@ export default class ProductService {
   }
 
   /* Gerar chaves de cache para busca e set
-  Exemplo: vilma:products:page:1|limit:20|category:22 */
+  Exemplo: cache:products:page:1|limit:20|category:22 */
   _generateCacheKey(prefix, params) {
     const sortedParams = Object.keys(params)
       .filter((key) => params[key] !== undefined && params[key] !== null)
@@ -102,7 +102,7 @@ export default class ProductService {
       .map((key) => `${key}:${params[key]}`)
       .join('|');
 
-    return `vilma:${prefix}:${sortedParams}`;
+    return `cache:${prefix}:${sortedParams}`;
   }
 
   // Invalidar o cache quando algum produto é criado, atualizado ou deletado
