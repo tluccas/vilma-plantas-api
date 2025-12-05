@@ -4,6 +4,7 @@ import Category from '../database/models/Category.js';
 const { Product, Image } = models;
 import redis from '../config/redis.js';
 import { logger } from '../util/logger.js';
+import { generateCacheKey } from '../util/CacheKeyGenerator.js';
 
 export default class ProductService {
   async findAll() {
@@ -18,7 +19,7 @@ export default class ProductService {
     const where = {};
 
     // Cria chave de cache específica
-    const cacheKey = this._generateCacheKey('products', {
+    const cacheKey = generateCacheKey('products', {
       page,
       limit,
       category,
@@ -91,18 +92,6 @@ export default class ProductService {
     }
 
     return { products, total };
-  }
-
-  /* Gerar chaves de cache para busca e set
-  Exemplo: cache:products:page:1|limit:20|category:22 */
-  _generateCacheKey(prefix, params) {
-    const sortedParams = Object.keys(params)
-      .filter((key) => params[key] !== undefined && params[key] !== null)
-      .sort()
-      .map((key) => `${key}:${params[key]}`)
-      .join('|');
-
-    return `cache:${prefix}:${sortedParams}`;
   }
 
   // Invalidar o cache quando algum produto é criado, atualizado ou deletado
