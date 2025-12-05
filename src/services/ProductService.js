@@ -4,7 +4,7 @@ import Category from '../database/models/Category.js';
 const { Product, Image } = models;
 import redis from '../config/redis.js';
 import { logger } from '../util/logger.js';
-import { generateCacheKey } from '../util/CacheKeyGenerator.js';
+import { cacheKeyGenerator } from '../util/CacheKeyGenerator.js';
 
 export default class ProductService {
   async findAll() {
@@ -19,7 +19,7 @@ export default class ProductService {
     const where = {};
 
     // Cria chave de cache específica
-    const cacheKey = generateCacheKey('products', {
+    const cacheKey = cacheKeyGenerator.generateCacheKey('products', {
       page,
       limit,
       category,
