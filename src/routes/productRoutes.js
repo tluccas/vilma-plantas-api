@@ -7,6 +7,7 @@ const routes = new Router();
 
 routes.get('/', ProductController.getProducts);
 routes.post('/', authMiddleware, roleMiddleware('admin'), ProductController.create);
+routes.patch('/:id', authMiddleware, roleMiddleware('admin'), ProductController.update);
 routes.delete('/:id', authMiddleware, roleMiddleware('admin'), ProductController.delete);
 
 export default routes;
