@@ -6,13 +6,14 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import cookieParser from 'cookie-parser';
-
+import { errorHandler } from './middlewares/ErrorMiddleware.js';
 class App {
   constructor() {
     this.server = express();
     this.middlewares();
     this.server.use(cookieParser());
     this.routes();
+    this.errorHandler();
   }
 
   middlewares() {
@@ -31,6 +32,10 @@ class App {
     this.server.use('/auth', authRoutes);
     this.server.use('/user', userRoutes);
     this.server.use('/product', productRoutes);
+  }
+
+  errorHandler() {
+    this.server.use(errorHandler);
   }
 }
 
