@@ -1,29 +1,36 @@
 import models from '../database/index.js';
 const { User } = models;
+import { NotFoundError, ConflictError, AppError } from '../util/error/index.js';
 
 export default class UserService {
-    async findAll() {
-        return await User.findAll({ attributes: { exclude: ['password'] } });
-    }
+  async findAll() {
+    const allUsers = await User.findAll({ attributes: { exclude: ['password'] } });
+    return allUsers;
+  }
 
-    async findById(id) {
-        return await User.findByPk(id, { attributes: { exclude: ['password'] } });
+  async findById(id) {
+    const user = await User.findByPk(id, { attributes: { exclude: ['password'] } });
+    if (!user) {
+      throw new NotFoundError('Usuário não encontrado');
     }
+    return user;
+  }
 
-    async create(userData) {
-        try {
-            const emailExists = await User.findOne({ where: { email: userData.email } });
-            if (emailExists) {
-                const error = new Error('Email já está em uso');
-                error.status = 400;
-                throw error;
-            }
+  async create(userData) {
+    try {
+      const emailExists = await User.findOne({ where: { email: userData.email } });
+      if (emailExists) {
+        throw new ConflictError('Email já cadastrado.');
+      }
 
-            const newUser = await User.create(userData);
-            return { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role };
-        }catch (error) {
-             console.error('Erro ao criar usuário:', error);
-             throw error.status ? error : new Error('Não foi possível criar o usuário.');
-        }
+      const newUser = await User.create(userData);
+      return { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role };
+    } catch (error) {
+      if (error.isOperational) {
+        throw error;
+      }
+
+      throw new AppError('Erro ao criar usuário', 500);
     }
+  }
 }
