@@ -25,6 +25,21 @@ class ProductController {
     }
   }
 
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const productData = req.body;
+
+      await createProductSchema.validate(productData, { abortEarly: false });
+
+      const updatedProduct = await service.update(id, productData);
+
+      return res.status(200).json(updatedProduct);
+    } catch (error) {
+      next(error);
+    }
+  }
+  
   async delete(req, res, next) {
     try {
       const { id } = req.params;
