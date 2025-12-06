@@ -115,7 +115,7 @@ export default class ProductService {
   // Invalidar o cache quando algum produto é criado, atualizado ou deletado
   async invalidateProductsCache() {
     try {
-      const pattern = 'vilma:products:*';
+      const pattern = 'cache:products:*';
       const keys = await redis.keys(pattern);
       if (keys.length > 0) {
         await redis.del(keys);
