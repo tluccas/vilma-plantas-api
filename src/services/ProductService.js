@@ -51,15 +51,15 @@ export default class ProductService {
       logger.warn('Redis cache read failed:', error.message);
     }
 
-      const where = {};
+    const where = {};
 
-      if (category) {
-        const categoryId = parseInt(category);
-        if (isNaN(categoryId)) {
-          throw new ValidationError('ID de categoria inválido');
-        }
-        where.category_id = categoryId;
+    if (category) {
+      const categoryId = parseInt(category);
+      if (isNaN(categoryId)) {
+        throw new ValidationError('ID de categoria inválido');
       }
+      where.category_id = categoryId;
+    }
 
     if (minPrice || maxPrice) {
       where.price = {};
@@ -115,7 +115,7 @@ export default class ProductService {
   // Invalidar o cache quando algum produto é criado, atualizado ou deletado
   async invalidateProductsCache() {
     try {
-      const pattern = 'vilma:products:*';
+      const pattern = 'cache:products:*';
       const keys = await redis.keys(pattern);
       if (keys.length > 0) {
         await redis.del(keys);
@@ -196,8 +196,84 @@ export default class ProductService {
     }
   }
 
-  // async update(id, productData) {}
+  async update(id, productData) {
+    try {
+      // Validar se categoria existe (se fornecida)
+      if (productData.category_id) {
+        const category = await Category.findByPk(productData.category_id);
+        if (!category) {
+          throw new NotFoundError('Categoria');
+        }
+      }
 
+      // Verificar se produto existe
+      const product = await Product.findByPk(id);
+      if (!product) {
+        throw new NotFoundError(`Produto ${id} não encontrado`);
+      }
+
+      // Verificar nome duplicado
+      if (productData.name && productData.name !== product.name) {
+        const existingProduct = await Product.findOne({
+          where: {
+            name: productData.name,
+            id: { [Op.ne]: id },
+          },
+        });
+        if (existingProduct) {
+          throw new ConflictError('Já existe um produto com este nome');
+        }
+      }
+
+      // Atualizar produto
+      const [affectedRows] = await Product.update(productData, { where: { id } });
+
+      if (affectedRows === 0) {
+        throw new NotFoundError('Produto não foi atualizado');
+      }
+
+      // Buscar produto atualizado com relacionamentos
+      const updatedProduct = await Product.findByPk(id, {
+        attributes: [
+          'id',
+          'name',
+          'price',
+          'category_id',
+          'description',
+          'stock',
+          'createdAt',
+          'updatedAt',
+        ],
+        include: [
+          { model: Category, as: 'category', attributes: ['name'] },
+          { model: Image, as: 'images', attributes: ['url'] },
+        ],
+      });
+
+      // Invalidar cache após atualizar produto
+      await this.invalidateProductsCache();
+
+      return updatedProduct;
+    } catch (error) {
+      logger.error('Erro ao atualizar produto:', error);
+
+      if (error.name === 'SequelizeValidationError') {
+        throw new ValidationError(
+          `Dados inválidos: ${error.errors.map((e) => e.message).join(', ')}`,
+        );
+      }
+
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new ConflictError('Produto com estes dados já existe');
+      }
+
+      if (error.isOperational) {
+        throw error;
+      }
+
+      throw new AppError('Erro ao atualizar produto', 500);
+    }
+  }
   async delete(id) {
     const product = await Product.findByPk(id);
     if (!product) {
