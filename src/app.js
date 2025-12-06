@@ -5,6 +5,7 @@ import healthRoute from './routes/healthRoute.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/ErrorMiddleware.js';
 class App {
@@ -32,6 +33,7 @@ class App {
     this.server.use('/auth', authRoutes);
     this.server.use('/user', userRoutes);
     this.server.use('/product', productRoutes);
+    this.server.use('/category', categoryRoutes);
   }
 
   errorHandler() {
