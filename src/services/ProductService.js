@@ -5,6 +5,7 @@ const { Product, Image } = models;
 import redis from '../config/redis.js';
 import { logger } from '../util/logger.js';
 import { cacheKeyGenerator } from '../util/CacheKeyGenerator.js';
+import { NotFoundError, ConflictError, ValidationError, AppError } from '../util/error/index.js';
 
 export default class ProductService {
   async findAll() {
@@ -12,11 +13,22 @@ export default class ProductService {
   }
 
   async getProducts({ page = 1, limit = 20, category, minPrice, maxPrice, sort }) {
+    logger.info(`getProducts() chamado | page=${page}`);
+
     page = Math.max(1, parseInt(page) || 1);
     limit = Math.min(100, Math.max(1, parseInt(limit) || 20));
 
+    if (minPrice && isNaN(parseFloat(minPrice))) {
+      throw new ValidationError('Preço mínimo inválido');
+    }
+    if (maxPrice && isNaN(parseFloat(maxPrice))) {
+      throw new ValidationError('Preço máximo inválido');
+    }
+    if (minPrice && maxPrice && parseFloat(minPrice) > parseFloat(maxPrice)) {
+      throw new ValidationError('Preço mínimo não pode ser maior que o máximo');
+    }
+
     const offset = (page - 1) * limit;
-    const where = {};
 
     // Cria chave de cache específica
     const cacheKey = cacheKeyGenerator.generateCacheKey('products', {
@@ -39,9 +51,15 @@ export default class ProductService {
       logger.warn('Redis cache read failed:', error.message);
     }
 
-    if (category) {
-      where.category_id = category;
-    }
+      const where = {};
+
+      if (category) {
+        const categoryId = parseInt(category);
+        if (isNaN(categoryId)) {
+          throw new ValidationError('ID de categoria inválido');
+        }
+        where.category_id = categoryId;
+      }
 
     if (minPrice || maxPrice) {
       where.price = {};
@@ -118,13 +136,13 @@ export default class ProductService {
       if (productData.category_id) {
         const category = await Category.findByPk(productData.category_id);
         if (!category) {
-          throw new Error('Categoria não encontrada');
+          throw new NotFoundError('Categoria');
         }
       }
 
       const existingProduct = await Product.findOne({ where: { name: productData.name } });
       if (existingProduct) {
-        throw new Error('Produto com esse nome já existe');
+        throw new ConflictError('Já existe um produto com este nome');
       }
 
       const newProduct = await Product.create(productData);
@@ -161,21 +179,20 @@ export default class ProductService {
       logger.error('Erro ao criar produto:', error);
 
       if (error.name === 'SequelizeValidationError') {
-        throw new Error(`Dados inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
+        throw new ValidationError(
+          `Dados inválidos: ${error.errors.map((e) => e.message).join(', ')}`,
+        );
       }
 
       if (error.name === 'SequelizeUniqueConstraintError') {
-        throw new Error('Produto com estes dados já existe');
+        throw new ConflictError('Produto com estes dados já existe');
       }
 
-      if (
-        error.message.includes('Categoria não encontrada') ||
-        error.message.includes('Já existe um produto')
-      ) {
+      if (error.isOperational) {
         throw error;
       }
 
-      throw new Error(error.message || 'Não foi possível criar o produto');
+      throw new AppError('Erro ao criar produto', 500);
     }
   }
 
@@ -184,7 +201,7 @@ export default class ProductService {
   async delete(id) {
     const product = await Product.findByPk(id);
     if (!product) {
-      throw new Error('Produto não encontrado');
+      throw new NotFoundError(`Produto ${id} não encontrado`);
     }
     await product.destroy();
 
