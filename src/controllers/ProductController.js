@@ -1,21 +1,19 @@
 import { createProductSchema } from '../validators/productValidator.js';
 import ProductService from '../services/ProductService.js ';
-import { logger } from '../util/logger.js';
 
 const service = new ProductService();
 
 class ProductController {
-  async getProducts(req, res) {
+  async getProducts(req, res, next) {
     try {
       const productsData = await service.getProducts(req.query);
       return res.status(200).json(productsData);
     } catch (error) {
-      logger.error('Erro no Controller ao buscar produtos:', error);
-      return res.status(500).json({ error: 'Erro interno ao buscar produtos.' });
+       next(error);
     }
   }
 
-  async create(req, res) {
+  async create(req, res, next) {
     try {
       await createProductSchema.validate(req.body, { abortEarly: false });
 
@@ -23,19 +21,17 @@ class ProductController {
 
       return res.status(201).json(newProduct);
     } catch (error) {
-      logger.error('Erro no Controller ao criar produto:', error);
-      return res.status(500).json({ error: error.message || 'Erro interno ao criar produto.' });
+      next(error);
     }
   }
 
-  async delete(req, res) {
+  async delete(req, res, next) {
     try {
       const { id } = req.params;
       await service.delete(id);
       return res.status(200).json({ message: 'Produto deletado com sucesso.' });
     } catch (error) {
-      logger.error('Erro no Controller ao deletar produto:', error);
-      return res.status(500).json({ error: error.message || 'Erro interno ao deletar produto.' });
+      next(error);
     }
   }
 }
