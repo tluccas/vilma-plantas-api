@@ -1,4 +1,4 @@
-import { createProductSchema } from '../validators/productValidator.js';
+import { createProductSchema, updateProductSchema } from '../validators/productValidator.js';
 import ProductService from '../services/ProductService.js ';
 
 const service = new ProductService();
@@ -30,7 +30,7 @@ class ProductController {
       const { id } = req.params;
       const productData = req.body;
 
-      await createProductSchema.validate(productData, { abortEarly: false });
+      await updateProductSchema.validate(productData, { abortEarly: false });
 
       const updatedProduct = await service.update(id, productData);
 
