@@ -99,17 +99,16 @@ export default class ProductService {
         { model: Image, as: 'images', attributes: ['url'] },
       ],
     });
-
+    const totalPages = Math.ceil(total / limit);
     // Salvar no cache
     try {
       const ttl = page === 1 ? 300 : 600; // 5min para página 1, 10min para outras
-      await redis.set(cacheKey, JSON.stringify({ products, total }), { EX: ttl });
+      await redis.set(cacheKey, JSON.stringify({ products, total, totalPages }), { EX: ttl });
       logger.info(`[ REDIS ] Cache set: ${cacheKey} (TTL: ${ttl}s)`);
     } catch (error) {
       logger.warn('Redis cache write failed:', error.message);
     }
 
-    const totalPages = Math.ceil(total / limit);
     return { products, total, totalPages };
   }
 
