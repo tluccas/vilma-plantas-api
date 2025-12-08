@@ -109,7 +109,8 @@ export default class ProductService {
       logger.warn('Redis cache write failed:', error.message);
     }
 
-    return { products, total };
+    const totalPages = Math.ceil(total / limit);
+    return { products, total, totalPages };
   }
 
   // Invalidar o cache quando algum produto é criado, atualizado ou deletado
