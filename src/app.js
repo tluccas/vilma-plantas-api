@@ -7,7 +7,7 @@ import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import cookieParser from 'cookie-parser';
-import { errorHandler } from './middlewares/ErrorMiddleware.js';
+import { errorHandler } from './middlewares/errorMiddleware.js';
 class App {
   constructor() {
     this.server = express();
@@ -18,12 +18,12 @@ class App {
   }
 
   middlewares() {
-    this.server.use(cors({
-      origin: ['http://localhost:3000',
-        'http://localhost:5173'
-      ],
-      credentials: true,
-    }));
+    this.server.use(
+      cors({
+        origin: ['http://localhost:3000', 'http://localhost:5173'],
+        credentials: true,
+      }),
+    );
     this.server.use(helmet());
     this.server.use(express.json());
   }
