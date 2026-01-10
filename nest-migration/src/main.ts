@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 const cookieParser = require('cookie-parser');
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
+import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -18,11 +19,12 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
 
-  const PORT: number = Number(process.env.PORT);
+  const PORT: string = process.env.PORT;
   await app.listen(PORT);
   console.log(`[ RODANDO ] Servidor rodando na porta: ${PORT}`);
 }
